@@ -17,7 +17,7 @@ typedef struct
 }Parametre;
 void YazdirDizi(int * dizi,size_t s);
 
-static void* Siralama(void * veri)
+static void* Siralama(void * veri)   //sort function
 {
     pthread_mutex_lock(&lock);
     
@@ -37,7 +37,8 @@ static void* Siralama(void * veri)
 
     YazdirDizi(p->dizi,p->s);
      int temp,j,i;
-       for(i=0;i<(p->s)-1;i++)
+       for(i=0;i<(p->s)-1;i++)    //bubble sort...
+       
         {
             for(j=0;j<(p->s)-i-1;j++)
             {
