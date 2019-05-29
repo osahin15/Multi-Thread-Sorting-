@@ -1,0 +1,146 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+
+#define Eleman 90
+
+int sayac = 0;
+
+
+pthread_mutex_t lock;
+
+typedef struct
+{
+    int* dizi;
+    size_t s;
+
+}Parametre;
+void YazdirDizi(int * dizi,size_t s);
+
+static void* Siralama(void * veri)
+{
+    pthread_mutex_lock(&lock);
+    
+    Parametre * p = (Parametre *)veri;
+        if(sayac==0){
+            printf("Thread1 Siralanmamis:\n");
+	}
+        else if(sayac==1){
+            printf("Thread2 Siralanmamis:\n");
+	}
+        else if(sayac==2){
+            printf("Thread3 Siralanmamis:\n");
+	}
+        else{
+            printf("Thread 4 Birlesmis:\n");
+	}
+
+    YazdirDizi(p->dizi,p->s);
+     int temp,j,i;
+       for(i=0;i<(p->s)-1;i++)
+        {
+            for(j=0;j<(p->s)-i-1;j++)
+            {
+                if(p->dizi[j]>p->dizi[j+1])
+                {
+                    temp=p->dizi[j];
+                    p->dizi[j]=p->dizi[j+1];
+                    p->dizi[j+1]=temp;
+                }
+            }
+        }
+        if(sayac==0){
+            printf("Thread1:\n");
+	}
+        else if(sayac==1){
+            printf("Thread2:\n");
+	}
+        else if(sayac==2){
+            printf("Thread3:\n");
+	}
+        else{
+            printf("Thread4:\n");
+	}
+
+        for(i = 0;i<p->s;i++)
+        {
+            printf("%d.Elemani %d\n",i+1,p->dizi[i]);
+
+        }
+        sayac++;
+        pthread_mutex_unlock(&lock);
+        return veri;
+}
+
+int main()
+{
+     int dizi[Eleman];
+    int i,j,temp;
+    int randint;
+    srand(time(0));
+    randint=rand()%500;
+    dizi[0]=randint;
+    //Birbirinden bağımsız sayılar oluşturma
+    for(i=0;i<Eleman;i++)
+    {
+        randint=rand()%500;
+        for(j=0;j<i;j++)
+        {
+            if(dizi[j]==randint)
+            {
+                i--;
+                break;
+            }
+            else
+            {
+                dizi[i]=randint;
+            }
+        }
+    }
+
+    Parametre p1;
+    p1.dizi = &(dizi[0]);
+    p1.s=30;
+    Parametre p2;
+    p2.dizi = &(dizi[30]);
+    p2.s=30;
+    Parametre p3;
+    p3.dizi = &(dizi[60]);
+    p3.s = 30;
+    Parametre p4;
+    p4.dizi=&(dizi[0]);
+    p4.s=90;
+
+    if(pthread_mutex_init(&lock,NULL)!=0)
+    {
+        printf("\n mutex init failed\n");
+        return 1;
+    }
+    pthread_t tid1,tid2,tid3,tid4;
+
+
+
+      pthread_create(&tid4,NULL,&Siralama,(void *)&p4);
+      pthread_create(&tid3,NULL,&Siralama,(void *)&p3);
+      pthread_create(&tid2,NULL,&Siralama,(void *)&p2);
+      pthread_create(&tid1,NULL,&Siralama,(void *)&p1);
+
+    pthread_join(tid1,NULL);
+    pthread_join(tid2,NULL);
+    pthread_join(tid3,NULL);
+    pthread_join(tid4,NULL);
+
+    pthread_mutex_destroy(&lock);
+    return 0;
+}
+
+void YazdirDizi(int * dizi,size_t s)
+{
+    int i ;
+    for( i = 0;i<s;i++)
+    {
+        printf("%d-",dizi[i]);
+
+    }
+    printf("\n");
+}
